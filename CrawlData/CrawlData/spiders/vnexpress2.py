@@ -1,6 +1,12 @@
 from scrapy import Spider, Request
 from ..items import Document
 import re 
+from kafka import KafkaProducer
+import json 
+
+def serializer(message):
+    return json.dumps(message).encode('utf-8')
+
 
 
 class VnExpress(Spider):
@@ -11,6 +17,16 @@ class VnExpress(Spider):
         'giao-duc',
         'doi-song',
     ]
+
+    producer = KafkaProducer(
+        bootstrap_servers=['dmk:9092'],
+        value_serializer=serializer
+    )
+
+    def start_requests(self):
+        for label in self.list_label:
+            url_temp = self.start_url + label +'/trang{}'
+            yield Request(url=url_temp.format(1), callback=self.parse, meta={'current_url': url_temp, 'page_index': 1})
 
     def start_requests(self):
         for label in self.list_label:
@@ -29,17 +45,21 @@ class VnExpress(Spider):
             for url in list_urls:
                 yield response.follow(url=url, callback=self.parser_content, meta={'page_index': page_index})
             
-            if page_index < 1500:
+            if page_index < 30:
                 yield response.follow(url=url_temp.format(page_index+1), callback=self.parse, meta={'current_url': url_temp, 'page_index': page_index+1})
 
     
     def parser_content(self, response):
-        item = Document()
-        item['url'] = response.url
-        item['page_index'] = response.meta.get('page_index', None)  
-        item['label'] = response.xpath('//*[@class="top-cate-head-title"]/a/text()').get()
-        item['sub_label'] = response.xpath('//*[@class="top-cate-head-subcate-child"]/a/@title').get()
-        item['text'] = response.xpath('//*[@class="ArticleContent"]/p/text()').getall()
-        item['date'] = response.xpath('//*[@class="time-zone"]/text()').get()
+        url = response.url
+        page_index = response.meta.get('page_index', None)  
+        label = response.xpath('//*[@class="top-cate-head-title"]/a/text()').get()
+        sub_label = response.xpath('//*[@class="top-cate-head-subcate-child"]/a/@title').get()
+        text = response.xpath('//*[@class="ArticleContent"]/p/text()').getall()
+        date= response.xpath('//*[@class="time-zone"]/text()').get()
         
-        yield item 
+        data = {
+            'url': url,
+            'text': text
+        }
+        
+        self.producer.send('new2', data)
