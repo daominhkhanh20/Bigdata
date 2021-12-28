@@ -37,7 +37,7 @@ class VnExpress(Spider):
             for url in list_urls:
                 yield response.follow(url=url, callback=self.parser_content, meta={'page_index': page_index})
             
-            if page_index < 5:
+            if page_index < 1500:
                 yield response.follow(url=url_temp.format(page_index+1), callback=self.parse, meta={'current_url': url_temp, 'page_index': page_index+1})
 
     
@@ -51,9 +51,14 @@ class VnExpress(Spider):
         
         data = {
             'url': url,
-            'text': text
+            'page_index':page_index,
+            'label':label,
+            'sub_label':sub_label,
+            'text': text,
+            'date':date
         }
-        self.producer.send('new2', data)
+        
+        self.producer.send('news', data)
         # item = Document()
         # item['url'] = response.url
         # item['page_index'] = response.meta.get('page_index', None)  

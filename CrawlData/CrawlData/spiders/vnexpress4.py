@@ -1,6 +1,11 @@
 from scrapy import Spider, Request
 from ..items import Document
 import re 
+from kafka import KafkaProducer
+import json 
+
+def serializer(message):
+    return json.dumps(message).encode('utf-8')
 
 
 class VnExpress(Spider):
@@ -12,6 +17,11 @@ class VnExpress(Spider):
         'oto-xe-may',
         'du-lich',
     ]
+
+    producer = KafkaProducer(
+        bootstrap_servers=['dmk:9092'],
+        value_serializer=serializer
+    )
 
     def start_requests(self):
         for label in self.list_label:
@@ -30,7 +40,7 @@ class VnExpress(Spider):
             for url in list_urls:
                 yield response.follow(url=url, callback=self.parser_content, meta={'page_index': page_index})
             
-            if page_index < 10:
+            if page_index < 1500:
                 yield response.follow(url=url_temp.format(page_index+1), callback=self.parse, meta={'current_url': url_temp, 'page_index': page_index+1})
 
     
@@ -44,7 +54,11 @@ class VnExpress(Spider):
         
         data = {
             'url': url,
-            'text': text
+            'page_index':page_index,
+            'label':label,
+            'sub_label':sub_label,
+            'text': text,
+            'date':date
         }
         
-        self.producer.send('new2', data)
+        self.producer.send('news', data)
