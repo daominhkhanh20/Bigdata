@@ -14,6 +14,7 @@ if __name__ == '__main__':
         'SmallData',
         bootstrap_servers='dmk:9092',
         auto_offset_reset='earliest',
+        group_id='test2'
     )
     i = 1
     data = []
