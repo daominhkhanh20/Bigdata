@@ -23,7 +23,7 @@ if __name__ == '__main__':
         message = json.loads(message.value)
         data.append(message)
         # print(message)
-        if idx >0 and idx%1000 == 0:
+        if idx >0 and idx%100 == 0:
             df = pd.DataFrame(data)
             data = []
             df_spark = spark.createDataFrame(df)
