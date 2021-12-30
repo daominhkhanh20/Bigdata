@@ -40,7 +40,7 @@ class VnExpress(Spider):
             for url in list_urls:
                 yield response.follow(url=url, callback=self.parser_content, meta={'page_index': page_index})
             
-            if page_index < 1500:
+            if page_index < 50:
                 yield response.follow(url=url_temp.format(page_index+1), callback=self.parse, meta={'current_url': url_temp, 'page_index': page_index+1})
 
     
