@@ -11,20 +11,20 @@ def serializer(message):
 if __name__ == '__main__':
     # Kafka Consumer
     consumer = KafkaConsumer(
-        'test',
+        'SmallData',
         bootstrap_servers='dmk:9092',
         auto_offset_reset='earliest',
-        group_id='test2',
     )
     i = 1
     data = []
+    print("\n")
     for idx,message in enumerate(consumer):
         message = json.loads(message.value)
-        print(message)
         data.append(message)
-        if idx > 0 and idx%1000 == 0:
+        # print(message)
+        if idx >0 and idx%1000 == 0:
             df = pd.DataFrame(data)
             data = []
             df_spark = spark.createDataFrame(df)
-            df_spark.coalesce(1).write.mode('append').json('hdfs://dmk:9000/DataVnExpress')
-            print("Upload success")
+            df_spark.coalesce(1).write.mode('append').json('hdfs://dmk:9000/DataVnExpress1')
+            print("\n\nUpload success\n\n")

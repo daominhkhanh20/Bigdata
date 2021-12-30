@@ -61,4 +61,4 @@ class VnExpress(Spider):
             'date':date
         }
         
-        self.producer.send('news', data)
+        self.producer.send('SmallData', data)

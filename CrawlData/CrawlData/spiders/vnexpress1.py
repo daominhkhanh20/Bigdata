@@ -58,7 +58,7 @@ class VnExpress(Spider):
             'date':date
         }
         
-        self.producer.send('news', data)
+        self.producer.send('SmallData', data)
         # item = Document()
         # item['url'] = response.url
         # item['page_index'] = response.meta.get('page_index', None)  
