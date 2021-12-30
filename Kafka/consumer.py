@@ -2,25 +2,31 @@ import json
 import csv
 from kafka import KafkaConsumer
 import pandas as pd
-from pyspark.sql import SparkSession
-spark = SparkSession.builder.appName("Uploade data to HDFS").getOrCreate()
+# from pyspark.sql import SparkSession
+# spark = SparkSession.builder.appName("Uploade data to HDFS").getOrCreate()
+
+def serializer(message):
+    return json.dumps(message).encode('utf-8')
 
 
 if __name__ == '__main__':
     # Kafka Consumer
     consumer = KafkaConsumer(
-        'new2',
+        'test',
         bootstrap_servers='dmk:9092',
-        auto_offset_reset='earliest'
+        auto_offset_reset='earliest',
+        group_id='test2',
+        # value_deserializer=serializer
     )
     i = 1
     data = []
     for idx,message in enumerate(consumer):
         message = json.loads(message.value)
-        data.append(message)
-        if idx > 0 and idx%10 == 0:
-            df = pd.DataFrame(data)
-            data = []
-            df_spark = spark.createDataFrame(df)
-            df_spark.coalesce(1).write.mode('append').json('hdfs://master:9000/Data0')
-            print("Upload success")
+        print(message)
+        # data.append(message)
+        # if idx > 0 and idx%10 == 0:
+        #     df = pd.DataFrame(data)
+        #     data = []
+        #     df_spark = spark.createDataFrame(df)
+        #     df_spark.coalesce(1).write.mode('append').json('hdfs://dmk:9000/DataNew')
+        #     print("Upload success")
