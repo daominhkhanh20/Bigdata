@@ -23,9 +23,9 @@ if __name__ == '__main__':
         message = json.loads(message.value)
         data.append(message)
         # print(message)
-        if idx >0 and idx%100 == 0:
+        if idx >0 and idx%50 == 0:
             df = pd.DataFrame(data)
             data = []
             df_spark = spark.createDataFrame(df)
-            df_spark.coalesce(1).write.mode('append').json('hdfs://dmk:9000/DataVnExpress1')
+            df_spark.coalesce(1).write.mode('append').json('hdfs://dmk:9000/SmallData1')
             print("\n\nUpload success\n\n")
